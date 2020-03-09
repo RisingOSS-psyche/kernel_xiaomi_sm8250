@@ -933,10 +933,18 @@ int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
 	int lhbm_target = 0;
 
 	if (status) {
+		if (ea_panel_is_enabled()) {
+			ea_panel_mode_ctrl(panel, 0);
+			panel->resend_ea = true;
+		}
 		lhbm_target = mi_get_fod_lhbm_target_brightness(panel);
 		dsi_panel_set_disp_param(panel, DISPPARAM_HBM_FOD_ON|lhbm_target);
 	} else {
 		dsi_panel_set_disp_param(panel, DISPPARAM_HBM_FOD_OFF);
+		if (panel->resend_ea) {
+			ea_panel_mode_ctrl(panel, 1);
+			panel->resend_ea = false;
+		}
 	}
 
 	return rc;
